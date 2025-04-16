@@ -5,6 +5,7 @@ import { Container, Heading } from "../../router";
 import { selectUser } from "../../redux/features/authSlice";
 import { FaCloudUploadAlt, FaMoneyBillWave, FaHistory } from "react-icons/fa";
 import { Loader } from "../../components/common/Loader";
+import { BACKEND_URL } from "../../utils/url";
 
 export const BalanceRequest = () => {
   const user = useSelector(selectUser);
@@ -96,7 +97,7 @@ export const BalanceRequest = () => {
       requestFormData.append("proofImage", file);
       
       // Log the API request URL
-      const apiUrl = "http://localhost:5000/api/balance/request";
+      const apiUrl = `${BACKEND_URL}/balance/request`;
       console.log("API Request URL:", apiUrl);
       
       // Send request using fetch
