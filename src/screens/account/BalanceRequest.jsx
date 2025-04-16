@@ -152,7 +152,7 @@ export const BalanceRequest = () => {
     try {
       setIsHistoryLoading(true);
       
-      const apiUrl = "http://localhost:5000/api/balance/requests";
+      const apiUrl = `${BACKEND_URL}/balance/requests`;
       console.log("Fetching balance requests from:", apiUrl);
       
       const response = await fetch(apiUrl, {
