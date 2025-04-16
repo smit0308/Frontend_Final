@@ -9,7 +9,7 @@ body {
 }
 /*    Navbar   */
 .menu-container {
-  background-color: #24262b;
+  background-color: #24262b;
   opacity: 0;
   transform: translateX(-100%);
   transition: opacity 0.3s ease-out, transform 0.3s ease-out;
