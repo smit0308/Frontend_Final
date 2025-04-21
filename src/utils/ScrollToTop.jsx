@@ -11,7 +11,9 @@ export const ScrollToTop = () => {
       left: 0,
       behavior: "instant", // Optional if you want to skip the scrolling animation
     });
+    
   }, [pathname]);
 
   return null;
 };
+
