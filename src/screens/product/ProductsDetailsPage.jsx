@@ -72,64 +72,109 @@ export const ProductsDetailsPage = () => {
       const fetchExchangeRates = async () => {
         setIsLoadingRates(true);
         try {
-          // Try openexchangerates API (more reliable, no API key for this endpoint)
-          const response = await fetch('https://open.er-api.com/v6/latest/USD');
+          const today = new Date().toISOString().split('T')[0]; // e.g., '2025-04-22'
+          const url = `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@${today}/v1/currencies/usd.json`;
+
+          const response = await fetch(url);
           const data = await response.json();
-          
-          if (data && data.rates) {
-            setExchangeRates(data.rates);
-            console.log("Exchange rates loaded successfully");
-            
-            // Set initial currency based on product's currency
+
+          if (data && data.usd) {
+            setExchangeRates(data.usd);
+            console.log("Exchange rates loaded from fawazahmed0 API");
+    
             if (product && product.currency) {
               setSelectedCurrency(product.currency);
             }
           } else {
-            // Fallback to another API if the first one fails
-            console.log("Primary API failed, trying fallback...");
-            const fallbackResponse = await fetch('https://api.exchangerate.host/latest?base=USD');
-            const fallbackData = await fallbackResponse.json();
-            
-            if (fallbackData && fallbackData.rates) {
-              setExchangeRates(fallbackData.rates);
-              console.log("Exchange rates loaded from fallback API");
-              
-              // Set initial currency based on product's currency
-              if (product && product.currency) {
-                setSelectedCurrency(product.currency);
-              }
-            } else {
-              throw new Error("All API endpoints failed");
-            }
+            throw new Error("Currency data not available in response");
           }
         } catch (error) {
           console.error("Error fetching exchange rates:", error);
           toast.error("Error loading exchange rates. Using default USD conversion.");
+    
+          // Fallback exchange rates
+      setExchangeRates({
+        "eur": 0.93,
+        "gbp": 0.79,
+        "jpy": 150.5,
+        "cad": 1.38,
+        "aud": 1.52,
+        "inr": 83.5,
+        "cny": 7.14,
+        "sgd": 1.34,
+        "chf": 0.9
+      });
+
+      if (product && product.currency) {
+        setSelectedCurrency(product.currency);
+      }
+    } finally {
+      setIsLoadingRates(false);
+    }
+  };
+
+  fetchExchangeRates();
+}, [product]);
+
+
+          // Try openexchangerates API (more reliable, no API key for this endpoint)
+          // const response = await fetch('https://open.er-api.com/v6/latest/USD');
+          // const data = await response.json();
+          
+        //   if (data && data.rates) {
+        //     setExchangeRates(data.rates);
+        //     console.log("Exchange rates loaded successfully");
+            
+        //     // Set initial currency based on product's currency
+        //     if (product && product.currency) {
+        //       setSelectedCurrency(product.currency);
+        //     }
+        //   } else {
+        //     // Fallback to another API if the first one fails
+        //     console.log("Primary API failed, trying fallback...");
+        //     const fallbackResponse = await fetch('https://api.exchangerate.host/latest?base=USD');
+        //     const fallbackData = await fallbackResponse.json();
+            
+        //     if (fallbackData && fallbackData.rates) {
+        //       setExchangeRates(fallbackData.rates);
+        //       console.log("Exchange rates loaded from fallback API");
+              
+        //       // Set initial currency based on product's currency
+        //       if (product && product.currency) {
+        //         setSelectedCurrency(product.currency);
+        //       }
+        //     } else {
+        //       throw new Error("All API endpoints failed");
+        //     }
+        //   }
+        // } catch (error) {
+        //   console.error("Error fetching exchange rates:", error);
+        //   toast.error("Error loading exchange rates. Using default USD conversion.");
           
           // Set default exchange rates for common currencies as a last resort
-          setExchangeRates({
-            "EUR": 0.93,
-            "GBP": 0.79,
-            "JPY": 150.5,
-            "CAD": 1.38,
-            "AUD": 1.52,
-            "INR": 83.5,
-            "CNY": 7.14,
-            "SGD": 1.34,
-            "CHF": 0.9
-          });
+    //       setExchangeRates({
+    //         "EUR": 0.93,
+    //         "GBP": 0.79,
+    //         "JPY": 150.5,
+    //         "CAD": 1.38,
+    //         "AUD": 1.52,
+    //         "INR": 83.5,
+    //         "CNY": 7.14,
+    //         "SGD": 1.34,
+    //         "CHF": 0.9
+    //       });
           
-          // Set initial currency based on product's currency
-          if (product && product.currency) {
-            setSelectedCurrency(product.currency);
-          }
-        } finally {
-          setIsLoadingRates(false);
-        }
-      };
+    //       // Set initial currency based on product's currency
+    //       if (product && product.currency) {
+    //         setSelectedCurrency(product.currency);
+    //       }
+    //     } finally {
+    //       setIsLoadingRates(false);
+    //     }
+    //   };
 
-      fetchExchangeRates();
-    }, [product]);
+    //   fetchExchangeRates();
+    // }, [product]);
 
     // Convert price from product currency to selected currency with error checking
     const convertPrice = (price, fromCurrency, toCurrency) => {
@@ -137,8 +182,11 @@ export const ProductsDetailsPage = () => {
         return price;
       }
       
+      const from = fromCurrency.toLowerCase();
+      const to = toCurrency.toLowerCase();
+
       // If currencies are the same, no conversion needed
-      if (fromCurrency === toCurrency) {
+      if (from === to) {
         return parseFloat(price).toFixed(2);
       }
       
@@ -149,14 +197,14 @@ export const ProductsDetailsPage = () => {
       
       try {
         // Convert to USD first
-        const priceInUSD = fromCurrency === "USD" 
+        const priceInUSD = from === "USD" 
           ? parseFloat(price) 
-          : parseFloat(price) / (exchangeRates[fromCurrency] || 1);
+          : parseFloat(price) / (exchangeRates[from] || 1);
         
         // Then convert from USD to target currency
-        const convertedPrice = toCurrency === "USD"
+        const convertedPrice = to === "USD"
           ? priceInUSD
-          : priceInUSD * (exchangeRates[toCurrency] || 1);
+          : priceInUSD * (exchangeRates[to] || 1);
           
         return convertedPrice.toFixed(2);
       } catch (error) {

@@ -9,7 +9,9 @@ const register = async (userData) => {
 };
 
 const login = async (userData) => {
-    const response = await axios.post(AUTH_URL + "login", userData);
+    const response = await axios.post(AUTH_URL + "login", userData, {
+        withCredentials: true
+      });
     return response.data;
 };
 

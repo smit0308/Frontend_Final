@@ -19,7 +19,7 @@ export const Login = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState(initialState);
     const {email, password} = formData;
-    const {isLoggedIn, isError}  = useSelector(state => state.auth);
+    const {isLoggedIn, isError, isLoading}  = useSelector(state => state.auth);
   
     const handleInputChange = (e) =>{
       const {name, value} = e.target;
@@ -32,13 +32,16 @@ export const Login = () => {
       if (!email || !password){
         return toast.error("All fields are required!");
       }
+       // prevent repeated calls
+        if (isLoading) return;
+
     dipatch(login({email, password}));
     };
   
     useEffect(() => {
-      if (isLoggedIn){
-        navigate("/dashboard");
+      if (isLoggedIn && !isError){
         toast.success("Login Successful");
+        navigate("/dashboard");
       }
     },[ isLoggedIn, isError, navigate]);
 
