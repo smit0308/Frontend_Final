@@ -1,11 +1,17 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+// vite.config.js
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  base: './',            // ← ensures CSS/JS paths are relative
-  plugins: [react()],
+  plugins: [
+    react({
+      include: ['**/*.jsx', '**/*.js'],  // tell Vite to treat .js files as JSX too
+      jsxRuntime: 'automatic',
+    })
+  ],
+  base: './',
   build: {
-    outDir: 'build',     // your existing setting
+    outDir: 'build',
     emptyOutDir: true,
   },
-})
+});
